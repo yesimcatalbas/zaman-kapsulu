@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ veri.tam_tarih }} - Zaman Arşivi</title>
+    <title>{{ veri.tam_tarih }} Tarihli Zaman Arşivi</title>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace; /* Daktilo esintisi */
-            background: linear-gradient(135deg, #2c1a04 0%, #0f172a 100%); /* Dinamik ve derin arka plan */
+            font-family: 'Courier New', Courier, monospace;
+            background: linear-gradient(135deg, #2c1a04 0%, #0f172a 100%);
             color: #f8fafc;
             margin: 0;
             padding: 50px 20px;
@@ -17,12 +17,12 @@
         .kapsul {
             max-width: 750px;
             margin: auto;
-            border: 3px solid #e2b007; /* Altın sarısı çerçeve */
+            border: 3px solid #e2b007;
             padding: 40px;
-            background-color: #fffaf0; /* Canlı parşömen rengi */
+            background-color: #fffaf0;
             color: #1e293b;
             border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(139, 92, 26, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         .ust-baslik {
             text-align: center;
@@ -32,43 +32,34 @@
         }
         .ust-baslik h1 {
             font-family: 'Georgia', serif;
-            font-size: 40px;
+            font-size: 36px;
             margin: 0;
-            color: #7c2d12; /* Canlı kiremit rengi */
+            color: #7c2d12;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
         }
-        .tarih-etiketi {
-            font-weight: bold;
-            font-size: 20px;
-            color: #0284c7; /* Canlı mavi vurgu */
-            margin-top: 10px;
-            background: #e0f2fe;
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
+        .olay-listesi {
+            margin-top: 20px;
         }
-        h3 {
-            font-family: 'Georgia', serif;
-            color: #b45309;
-            border-left: 5px solid #b45309;
-            padding-left: 10px;
-        }
-        /* Gazete Alıntı Kupürü */
-        .gazete-kupuru {
+        /* Her bir gazete maddesi/olay kutusu */
+        .gazete-maddesi {
             background: #f3eae1;
-            border-right: 4px solid #b45309;
-            border-left: 4px solid #b45309;
-            padding: 25px;
-            margin: 25px 0;
-            font-style: italic;
-            font-size: 19px;
+            border-left: 5px solid #b45309;
+            padding: 20px;
+            margin-bottom: 20px;
             line-height: 1.8;
+            font-size: 17px;
             text-align: justify;
-            color: #451a03;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.05);
-            position: relative;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+        }
+        .olay-yili {
+            font-weight: bold;
+            color: #b45309;
+            font-size: 19px;
+            display: block;
+            margin-bottom: 5px;
+            font-family: 'Georgia', serif;
         }
         .alt-menu {
             margin-top: 40px;
@@ -85,11 +76,6 @@
             border-radius: 30px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-geri:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
         }
     </style>
 </head>
@@ -97,19 +83,22 @@
 
     <div class="kapsul">
         <div class="ust-baslik">
-            <h1>🗞️ DİJİTAL ZAMAN ARŞİVİ</h1>
-            <div class="tarih-etiketi">⏳ Hedef Tarih: {{ veri.tam_tarih }}</div>
+            <h1>📅 {{ veri.tam_tarih }} TARİHİNDE YAŞANAN OLAYLAR</h1>
         </div>
 
-        <h3>📌 DÖNEMİN RADYO VE BASIN ALINTISI (Yıl: {{ veri.yil }})</h3>
-        
-        <div class="gazete-kupuru">
-    “{{ veri.alinti_metni }}”
-    
-    <div style="text-align: right; margin-top: 15px; font-size: 14px; color: #78350f; font-weight: bold;">
-        ✍️ {{ veri.muhabir }} | 📜 {{ veri.kod }}
+        <div class="olay-listesi">
+            {% for olay in veri.olaylar %}
+            <div class="gazete-maddesi">
+                <span class="olay-yili">📍 Yıl: {{ olay.yil }}</span>
+                {{ olay.metin }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="alt-menu">
+            <a href="/" class="btn-geri">🔄 Zaman Makinesini Yeniden Ayarla</a>
+        </div>
     </div>
-</div>
 
 </body>
 </html>
