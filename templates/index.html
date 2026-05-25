@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Kapsülü - Zaman Makinesi</title>
+    <title>Zaman Kapsülü - Zaman Makinesi</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
-            display: block;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 100px 20px;
         }
         .container {
             max-width: 500px;
-            margin: auto;
+            width: 100%;
             background: #1e293b;
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
         }
         h1 {
             color: #38bdf8;
@@ -62,7 +64,7 @@
 <body>
 
     <div class="container">
-        <h1>⏳ Web Kapsülü</h1>
+        <h1>⏳ Zaman Kapsülü</h1>
         <p>Girmek istediğiniz tarihi seçin ve internetin o günkü hafızasına doğru zaman yolculuğuna çıkın!</p>
         
         <form action="/" method="POST">
