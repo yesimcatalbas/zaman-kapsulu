@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import requests
 from datetime import datetime
 
@@ -12,35 +12,42 @@ def tarihten_veri_getir(secilen_tarih):
         ay = f"{tarih_objesi.month:02d}"
         yil = tarih_objesi.year
 
-        # Wikipedia Türkçe "Tarihte Bugün" API'si
+        # Wikipedia'dan o günün ait olduğu ayın tüm olaylarını çekiyoruz
         api_adresi = f"https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/all/{ay}/{gun}"
         headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@webkapsulu.com)'}
         
         yanit = requests.get(api_adresi, headers=headers).json()
         olaylar = yanit.get("selected", [])
 
-        # O güne ait tüm olayları temiz bir liste haline getiriyoruz
         olay_listesi = []
         for olay in olaylar:
-            metin = olay.get("text")
             olay_yili = olay.get("year")
-            if metin and olay_yili:
+            metin = olay.get("text")
+            
+            # KESİN FİLTRE: Sadece kullanıcının seçtiği YILDA olan olayları getir
+            if olay_yili == yil and metin:
                 olay_listesi.append({
                     "yil": olay_yili,
                     "metin": metin
                 })
 
-        # Eğer o güne ait hiçbir olay dönmezse boş kalmasın diye önlem
+        # EĞER TAM O YILDA VE GÜNDE BAŞKA OLAY YOKSA:
+        # Boş kalmasın diye o yılın o ayında gerçekleşen diğer önemli olayları havuzdan çekip listeliyoruz
         if not olay_listesi:
-            olay_listesi.append({
-                "yil": yil,
-                "metin": "Bu tarihe ait arşiv kaydı bulunamadı."
-            })
+            for olay in olaylar:
+                olay_yili = olay.get("year")
+                metin = olay.get("text")
+                # Kullanıcının seçtiği yılın yakınlarında o ayda olan olayları topluyoruz
+                if olay_yili and (yil - 3 <= olay_yili <= yil + 3) and metin:
+                    olay_listesi.append({
+                        "yil": olay_yili,
+                        "metin": metin
+                    })
 
         return {
             "durum": True,
             "tam_tarih": f"{gun}.{ay}.{yil}",
-            "olaylar": olay_listesi
+            "olaylar": olay_listesi[:5] # En fazla 5 tane net olay listelesin
         }
     except Exception as hata:
         return {
