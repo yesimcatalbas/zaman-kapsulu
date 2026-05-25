@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import requests
 from datetime import datetime
 
@@ -11,41 +11,34 @@ def tarihten_veri_getir(secilen_tarih):
         ay = f"{tarih_objesi.month:02d}"
         yil = tarih_objesi.year
 
-        # Wikipedia Türkçe "Tarihte Bugün" API'si
+        # Wikipedia Türkçe Tarihte Bugün API'si
         api_adresi = f"https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/all/{ay}/{gun}"
-        headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@webkapsulu.com)'}
+        headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@zaman-kapsulu.com)'}
         
         yanit = requests.get(api_adresi, headers=headers).json()
         olaylar = yanit.get("selected", [])
 
-        # O güne ait tüm olayları temiz bir liste haline getiriyoruz
-        olay_listesi = []
-        for olay in olaylar:
-            metin = olay.get("text")
-            olay_yili = olay.get("year")
-            if metin and olay_yili:
-                olay_listesi.append({
-                    "yil": olay_yili,
-                    "metin": metin
-                })
-
-        # Eğer o güne ait hiçbir olay dönmezse boş kalmasın diye önlem
-        if not olay_listesi:
-            olay_listesi.append({
-                "yil": yil,
-                "metin": "Bu tarihe ait arşiv kaydı bulunamadı."
-            })
+        if olaylar:
+            # En son gerçekleşen tek bir olayı seçiyoruz
+            en_son_olay = olaylar[-1]
+            metin = en_son_olay.get("text", "")
+            olay_yili = en_son_olay.get("year", yil)
+        else:
+            metin = "Bu tarihe ait özel bir arşiv kaydı bulunamadı."
+            olay_yili = yil
 
         return {
             "durum": True,
             "tam_tarih": f"{gun}.{ay}.{yil}",
-            "olaylar": olay_listesi
+            "olay_yili": olay_yili,
+            "metin": metin
         }
     except Exception as hata:
         return {
             "durum": False,
             "tam_tarih": secilen_tarih,
-            "olaylar": [{"yil": "Hata", "metin": "Arşiv bağlantısında bir sorun oluştu."}]
+            "olay_yili": "Hata",
+            "metin": "Arşiv bağlantısında bir sorun oluştu."
         }
 
 @app.route("/", methods=["GET", "POST"])

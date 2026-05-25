@@ -10,59 +10,50 @@
             background: linear-gradient(135deg, #2c1a04 0%, #0f172a 100%);
             color: #f8fafc;
             margin: 0;
-            padding: 50px 20px;
-            display: block;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .kapsul {
-            max-width: 750px;
-            margin: auto;
+            max-width: 650px;
+            width: 100%;
             border: 3px solid #e2b007;
             padding: 40px;
             background-color: #fffaf0;
             color: #1e293b;
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
         }
         .ust-baslik {
-            text-align: center;
             border-bottom: 5px double #e2b007;
             padding-bottom: 20px;
             margin-bottom: 35px;
         }
         .ust-baslik h1 {
             font-family: 'Georgia', serif;
-            font-size: 36px;
+            font-size: 28px;
             margin: 0;
             color: #7c2d12;
-            text-transform: uppercase;
-            letter-spacing: 2px;
         }
-        .olay-listesi {
-            margin-top: 20px;
-        }
-        /* Her bir gazete maddesi/olay kutusu */
-        .gazete-maddesi {
+        .olay-icerik {
             background: #f3eae1;
             border-left: 5px solid #b45309;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 25px;
             line-height: 1.8;
-            font-size: 17px;
+            font-size: 18px;
             text-align: justify;
             border-radius: 0 8px 8px 0;
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 35px;
         }
         .olay-yili {
             font-weight: bold;
             color: #b45309;
-            font-size: 19px;
+            font-size: 20px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             font-family: 'Georgia', serif;
-        }
-        .alt-menu {
-            margin-top: 40px;
-            text-align: center;
         }
         .btn-geri {
             display: inline-block;
@@ -82,16 +73,12 @@
 
     <div class="kapsul">
         <div class="ust-baslik">
-            <h1>📅 {{ veri.tam_tarih }} TARİHİNDE YAŞANAN OLAYLAR</h1>
+            <h1>📅 {{ veri.tam_tarih }} Tarihinde Yaşanmış Olay</h1>
         </div>
 
-        <div class="olay-listesi">
-            {% for olay in veri.olaylar %}
-            <div class="gazete-maddesi">
-                <span class="olay-yili">📍 Yıl: {{ olay.yil }}</span>
-                {{ olay.metin }}
-            </div>
-            {% endfor %}
+        <div class="olay-icerik">
+            <span class="olay-yili">📍 Yıl: {{ veri.olay_yili }}</span>
+            {{ veri.metin }}
         </div>
 
         <div class="alt-menu">
