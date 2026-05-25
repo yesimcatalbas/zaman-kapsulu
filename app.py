@@ -1,68 +1,66 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import requests
 from datetime import datetime
 
 app = Flask(__name__)
 
+# Yapay zekasız, tamamen internet verisine dayalı zaman makinesi fonksiyonu
 def tarihten_veri_getir(secilen_tarih):
     try:
+        # Gelen tarihi (Yıl-Ay-Gün) formatına parçalıyoruz
         tarih_objesi = datetime.strptime(secilen_tarih, "%Y-%m-%d")
-        gun = f"{tarih_objesi.day:02d}"
-        ay = f"{tarih_objesi.month:02d}"
-        yil = int(tarih_objesi.year)
+        gun = datetime_objesi_olustur(tarih_objesi.day)
+        ay = datetime_objesi_olustur(tarih_objesi.month)
+        yil = tarih_objesi.year
 
-        # Wikipedia Türkçe API adresi
+        # Wikipedia'nın "Tarihte Bugün" API'sinden o günkü tüm olayları çekiyoruz
         api_adresi = f"https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/all/{ay}/{gun}"
-        headers = {
-            "User-Agent": "ZamanKapsulu/1.0 (iletisim@zaman-kapsulu.com)"
-        }
+        headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@webkapsulu.com)'}
+        
+        yanit = requests.get(api_adresi, headers=headers).json()
+        olaylar = yanit.get("selected", [])
 
-        yanit = requests.get(api_adresi, headers=headers)
-        veri = yanit.json()
-
-        # DÜZELTME 1: Wikipedia API'sinde olaylar anahtarı "events" değil, "selected" olarak döner.
-        olaylar = veri.get("selected", [])
-
-        ayni_yil_olaylari = []
+        # Kullanıcının seçtiği yıla en yakın veya o yıldaki olayı buluyoruz
+        en_uygun_olay = "O tarihte dünya genelinde kayda değer büyük bir olay bulunamadı veya arşivlerde yok."
+        
         for olay in olaylar:
-            olay_yili = olay.get("year")
-            
-            # DÜZELTME 2: Gelen yıl bilgisi bazen None veya boş olabiliyor, güvenli kontrol ekledik.
-            if olay_yili is not None and int(olay_yili) == yil:
-                ayni_yil_olaylari.append(olay)
+            if olay.get("year") == yil:
+                en_uygun_olay = olay.get("text")
+                break
+            # Eğer tam o yıl yoksa, o güne ait popüler ilk olayı seçelim
+            elif olaylar:
+                en_uygun_olay = olaylar[0].get("text")
 
-        if ayni_yil_olaylari:
-            secilen_olay = ayni_yil_olaylari[0]
-            metin = secilen_olay.get("text", "")
-            return {
-                "durum": True,
-                "tam_tarih": f"{gun}.{ay}.{yil}",
-                "olay_yili": yil,
-                "metin": metin
-            }
-        else:
-            return {
-                "durum": False,
-                "tam_tarih": f"{gun}.{ay}.{yil}",
-                "olay_yili": yil,
-                "metin": f"{gun}.{ay}.{yil} tarihinde dünya genelinde resmi olarak kayda geçmiş büyük bir tarihi olay bulunamadı."
-            }
-
+        return {
+            "durum": True,
+            "olay": en_uygun_olay,
+            "yil": yil,
+            "tam_tarih": f"{gun}.{ay}.{yil}"
+        }
     except Exception as hata:
+        # İnternet kesilmesi veya API hatası durumunda çökmemesi için önlem
         return {
             "durum": False,
-            "tam_tarih": secilen_tarih,
-            "olay_yili": "Hata",
-            "metin": "Arşiv bağlantısında bir sorun oluştu."
+            "olay": "Veriler çekilirken bir hata oluştu. Lütfen tekrar deneyin.",
+            "yil": "Bilinmiyor",
+            "tam_tarih": secilen_tarih
         }
 
+def datetime_objesi_olustur(deger):
+    # API çift haneli gün/ay istediği için (örn: 5 yerine 05) biçimlendirme yapıyoruz
+    return f"{deger:02d}"
+
+# ANA SAYFA: Kullanıcının tarihi seçtiği yer
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        # Formdan gelen tarihi alıyoruz
         kullanici_tarihi = request.form.get("tarih_girdisi")
         if kullanici_tarihi:
-            sonuc = tarihten_veri_getir(kullanici_tarihi)
-            return render_template("tasarim.html", veri=sonuc)
+            # Veriyi çekip tasarım sayfasına parametre olarak gönderiyoruz
+            sonuclar = tarihten_veri_getir(kullanici_tarihi)
+            return render_template("tasarim.html", veri=sonuclar)
+            
     return render_template("index.html")
 
 if __name__ == "__main__":
