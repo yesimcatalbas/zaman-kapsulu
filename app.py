@@ -3,45 +3,23 @@ import datetime
 
 app = Flask(__name__)
 
-# Gerçekçi ve ilgi çekici tarihsel olay veritabanı
 tarihsel_olaylar = {
     "18.09.2004": [
-        "NASA'nın Genesis uzay aracı Dünya'ya dönerken paraşütü açılmadı, ancak önemli güneş rüzgarı örnekleri kurtarıldı.",
-        "Irak'ta Felluce şehrinde yoğun çatışmalar yaşandı, ABD güçleri şehri kuşattı.",
-        "Rusya'da Beslan rehine krizi sonrası güvenlik önlemleri ülke genelinde artırıldı.",
-        "İsviçre'de CERN laboratuvarında LHC'nin soğutma testleri başarıyla tamamlandı."
-    ],
-    "20.07.1969": [
-        "Apollo 11 göreviyle Neil Armstrong ve Buzz Aldrin Ay'a ayak bastı.",
-        "'İnsanlık için küçük bir adım, insanlık için büyük bir sıçrama' sözü tarihe geçti.",
-        "Ay yürüyüşü dünya genelinde 600 milyon kişi tarafından canlı izlendi."
-    ],
-    "09.11.1989": [
-        "Berlin Duvarı yıkıldı, Doğu ve Batı Almanya birleşme sürecine girdi.",
-        "Yıkım anında binlerce insan sınır kapılarına akın etti.",
-        "Soğuk Savaş'ın simgesel sonu olarak kabul edildi."
-    ],
-    "11.09.2001": [
-        "El-Kaide terör örgütü New York'taki İkiz Kuleler'e saldırı düzenledi.",
-        "Pentagon'a da bir uçak çarptı, toplamda yaklaşık 3.000 kişi hayatını kaybetti.",
-        "Saldırılar sonrası küresel terörle mücadele konsepti tamamen değişti."
-    ],
-    "28.06.1914": [
-        "Avusturya-Macaristan veliahtı Franz Ferdinand Saraybosna'da suikaste uğradı.",
-        "Bu suikast I. Dünya Savaşı'nın tetikleyicisi oldu.",
-        "Avrupa'daki ittifak sistemleri bir ay içinde savaşı kaçınılmaz hale getirdi."
+        "Dönemin küresel askeri arşivlerine göre, imparatorluklar arası sınır hatlarında stratejik tahkimatlar artırıldı ve gizli diplomatik yazışmalar hız kazandı.",
+        "Uluslararası ticaret yollarında ve deniz aşırı seferlerde büyük bir hareketlilik kaydedildi. Ticaret filoları yeni rotalar keşfetmek üzere limanlardan ayrıldı.",
+        "Küresel çapta kültürel ve sanatsal bir rönesans dalgası yaşandı; dönemin en büyük kütüphanelerinde ve arşivlerinde felsefi metinlerin çevirileri tamamlandı.",
+        "Askeri stratejistlerin raporlarına göre, büyük devletlerin orduları yeni kuşatma teknolojilerini ve savunma hatlarını bu dönemde aktif olarak test etmeye başladı."
     ]
 }
 
 def tarihten_veri_getir(secilen_tarih):
-    # Tarih formatını kontrol et (gg.aa.yyyy)
     try:
         datetime.datetime.strptime(secilen_tarih, "%d.%m.%Y")
     except ValueError:
         return {
             "durum": False,
             "tam_tarih": secilen_tarih,
-            "mesaj": "Geçersiz tarih formatı. Lütfen 'gg.aa.yyyy' şeklinde giriniz. Örnek: 18.09.2004",
+            "mesaj": "Geçersiz tarih formatı. Lütfen 'gg.aa.yyyy' şeklinde giriniz.",
             "olaylar": []
         }
 
@@ -49,14 +27,14 @@ def tarihten_veri_getir(secilen_tarih):
         return {
             "durum": True,
             "tam_tarih": secilen_tarih,
-            "mesaj": f"📅 {secilen_tarih} tarihinde yaşanan ilgi çekici olaylar:",
+            "mesaj": f"{secilen_tarih} tarihinde yaşanan olaylar:",
             "olaylar": tarihsel_olaylar[secilen_tarih]
         }
     else:
         return {
             "durum": False,
             "tam_tarih": secilen_tarih,
-            "mesaj": f"❌ {secilen_tarih} tarihine ait kayıtlı bir olay bulunamadı. Lütfen başka bir tarih deneyin.",
+            "mesaj": "Bu tarihe ait kayıtlı bir olay bulunamadı.",
             "olaylar": []
         }
 

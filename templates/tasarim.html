@@ -1,40 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tarihte Bugün - Zaman Kapsülü</title>
+    <title>Olaylar - Zaman Kapsülü</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; margin: 0; }
-        .kapsul { background: white; padding: 30px; border-radius: 20px; max-width: 800px; margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        h2 { color: #2c3e66; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
-        .tarih-baslik { font-size: 1.4em; color: #764ba2; margin: 20px 0 10px 0; }
-        .olay { background: #f8f9ff; margin: 12px 0; padding: 12px 20px; border-radius: 10px; border-left: 5px solid #667eea; transition: transform 0.2s; }
-        .olay:hover { transform: translateX(5px); background: #f0f2ff; }
-        .olay-emoji { font-size: 1.2em; margin-right: 10px; }
-        .olay-text { color: #333; line-height: 1.5; }
-        .geri { display: inline-block; margin-top: 25px; background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
-        .geri:hover { background: #5a67d8; }
-        .hata { background: #fee; border-left-color: #e53e3e; }
+        body { font-family: Arial; padding: 30px; background: #fafafa; }
+        .kapsul { background: white; padding: 20px; border-radius: 12px; max-width: 700px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .olay { border-left: 4px solid #2c3e66; margin: 15px 0; padding: 10px 20px; background: #f9f9ff; }
+        .baslik { font-weight: bold; font-size: 1.2em; }
+        .aciklama { color: #555; }
+        .geri { display: inline-block; margin-top: 20px; color: #2c3e66; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="kapsul">
-        {% if veri.durum %}
-            <h2>📆 Zaman Kapsülü</h2>
-            <div class="tarih-baslik">{{ veri.mesaj }}</div>
+        <h2>📆 Tarih: {{ veri.tam_tarih }}</h2>
+        <p>{{ veri.mesaj }}</p>
+
+        {% if veri.olaylar %}
             {% for olay in veri.olaylar %}
             <div class="olay">
-                <span class="olay-emoji">📌</span>
-                <span class="olay-text">{{ olay }}</span>
+                <div class="baslik">✨ {{ olay.baslik }}</div>
+                <div class="aciklama">{{ olay.aciklama }}</div>
             </div>
             {% endfor %}
         {% else %}
-            <h2>⚠️ Hata</h2>
-            <div class="olay hata">
-                <span class="olay-emoji">❌</span>
-                <span class="olay-text">{{ veri.mesaj }}</span>
-            </div>
+            <p>⚠️ Bu tarihte kayıtlı bir olay yok.</p>
         {% endif %}
-        <a href="/" class="geri">← Yeni tarih sorgula</a>
+
+        <a href="/" class="geri">← Başka tarih sorgula</a>
     </div>
 </body>
 </html>
