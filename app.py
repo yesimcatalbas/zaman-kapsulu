@@ -1,41 +1,51 @@
-from flask import Flask, request, render_template
-import datetime
+from flask import Flask, render_template, request, redirect, url_for
+import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
-tarihsel_olaylar = {
-    "18.09.2004": [
-        "Dönemin küresel askeri arşivlerine göre, imparatorluklar arası sınır hatlarında stratejik tahkimatlar artırıldı ve gizli diplomatik yazışmalar hız kazandı.",
-        "Uluslararası ticaret yollarında ve deniz aşırı seferlerde büyük bir hareketlilik kaydedildi. Ticaret filoları yeni rotalar keşfetmek üzere limanlardan ayrıldı.",
-        "Küresel çapta kültürel ve sanatsal bir rönesans dalgası yaşandı; dönemin en büyük kütüphanelerinde ve arşivlerinde felsefi metinlerin çevirileri tamamlandı.",
-        "Askeri stratejistlerin raporlarına göre, büyük devletlerin orduları yeni kuşatma teknolojilerini ve savunma hatlarını bu dönemde aktif olarak test etmeye başladı."
-    ]
-}
-
 def tarihten_veri_getir(secilen_tarih):
     try:
-        datetime.datetime.strptime(secilen_tarih, "%d.%m.%Y")
-    except ValueError:
-        return {
-            "durum": False,
-            "tam_tarih": secilen_tarih,
-            "mesaj": "Geçersiz tarih formatı. Lütfen 'gg.aa.yyyy' şeklinde giriniz.",
-            "olaylar": []
-        }
+        tarih_objesi = datetime.strptime(secilen_tarih, "%Y-%m-%d")
+        gun = f"{tarih_objesi.day:02d}"
+        ay = f"{tarih_objesi.month:02d}"
+        yil = tarih_objesi.year
 
-    if secilen_tarih in tarihsel_olaylar:
+        # Wikipedia Türkçe "Tarihte Bugün" API'si
+        api_adresi = f"https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/all/{ay}/{gun}"
+        headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@webkapsulu.com)'}
+        
+        yanit = requests.get(api_adresi, headers=headers).json()
+        olaylar = yanit.get("selected", [])
+
+        # O güne ait tüm olayları temiz bir liste haline getiriyoruz
+        olay_listesi = []
+        for olay in olaylar:
+            metin = olay.get("text")
+            olay_yili = olay.get("year")
+            if metin and olay_yili:
+                olay_listesi.append({
+                    "yil": olay_yili,
+                    "metin": metin
+                })
+
+        # Eğer o güne ait hiçbir olay dönmezse boş kalmasın diye önlem
+        if not olay_listesi:
+            olay_listesi.append({
+                "yil": yil,
+                "metin": "Bu tarihe ait arşiv kaydı bulunamadı."
+            })
+
         return {
             "durum": True,
-            "tam_tarih": secilen_tarih,
-            "mesaj": f"{secilen_tarih} tarihinde yaşanan olaylar:",
-            "olaylar": tarihsel_olaylar[secilen_tarih]
+            "tam_tarih": f"{gun}.{ay}.{yil}",
+            "olaylar": olay_listesi
         }
-    else:
+    except Exception as hata:
         return {
             "durum": False,
             "tam_tarih": secilen_tarih,
-            "mesaj": "Bu tarihe ait kayıtlı bir olay bulunamadı.",
-            "olaylar": []
+            "olaylar": [{"yil": "Hata", "metin": "Arşiv bağlantısında bir sorun oluştu."}]
         }
 
 @app.route("/", methods=["GET", "POST"])
@@ -43,8 +53,9 @@ def index():
     if request.method == "POST":
         kullanici_tarihi = request.form.get("tarih_girdisi")
         if kullanici_tarihi:
-            sonuclar = tarihten_veri_getir(kullanici_tarihi.strip())
+            sonuclar = tarihten_veri_getir(kullanici_tarihi)
             return render_template("tasarim.html", veri=sonuclar)
+            
     return render_template("index.html")
 
 if __name__ == "__main__":
