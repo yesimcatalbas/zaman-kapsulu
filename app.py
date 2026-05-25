@@ -10,8 +10,9 @@ def tarihten_veri_getir(secilen_tarih):
         tarih_objesi = datetime.strptime(secilen_tarih, "%Y-%m-%d")
         gun = f"{tarih_objesi.day:02d}"
         ay = f"{tarih_objesi.month:02d}"
+        yil = tarih_objesi.year # Kullanıcının seçtiği net yıl (Örn: 1122)
 
-        # Wikipedia Türkçe "Tarihte Bugün" API'si
+        # API'den o gün ve aya ait tarih boyu olmuş tüm olayları çekiyoruz
         api_adresi = f"https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/all/{ay}/{gun}"
         headers = {'User-Agent': 'ZamanKapsuluUygulamasi/1.0 (iletisim@webkapsulu.com)'}
         
@@ -20,34 +21,27 @@ def tarihten_veri_getir(secilen_tarih):
 
         olay_listesi = []
         for olay in olaylar:
-            metin = olay.get("text")
             olay_yili = olay.get("year")
+            metin = olay.get("text")
             
-            # İlgi çekici kelimeleri içeren olayları üst sıralara taşımak için basit bir filtre
-            # Yapay zekasız ama akıllıca bir mantık!
-            if metin and olay_yili:
+            # KATI KURAL: Yıl, kullanıcının seçtiği yıla BİREBİR eşit olmak zorunda!
+            if olay_yili == yil and metin:
                 olay_listesi.append({
                     "yil": olay_yili,
                     "metin": metin
                 })
 
-        # Olayları yıllara göre yeniden eskiye sıralıyoruz (Kronolojik gazete mantığı)
-        olay_listesi = sorted(olay_listesi, key=lambda x: x['yil'], reverse=True)
-
-        # Kullanıcıya en ilgi çekici ve net olan ilk 5-6 büyük olayı gösteriyoruz
-        en_iyi_olaylar = olay_listesi[:6]
-
-        # Eğer o gün şans eseri boşsa boş kalmasın diye garanti veri
-        if not en_iyi_olaylar:
-            en_iyi_olaylar.append({
-                "yil": "Tarih Boyunca",
-                "metin": "Bu özel günde dünya genelinde sakin bir seyir izlenmiştir."
+        # Eğer o gün ve o yılda hiçbir olay bulunamadıysa (Alakasız yılları asla gösterme!)
+        if not olay_listesi:
+            olay_listesi.append({
+                "yil": yil,
+                "metin": f"Arşiv kayıtlarına göre {gun}.{ay}.{yil} tarihinde dünya genelinde resmi olarak kayda geçmiş büyük bir diplomatik, askeri veya tarihi olay bulunmamaktadır."
             })
 
         return {
             "durum": True,
-            "tam_tarih": f"{gun}.{ay}.{tarih_objesi.year}",
-            "olaylar": en_iyi_olaylar
+            "tam_tarih": f"{gun}.{ay}.{yil}",
+            "olaylar": olay_listesi
         }
     except Exception as hata:
         return {
